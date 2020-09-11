@@ -1,8 +1,9 @@
 import React from "react";
-// import Auth from "../services/auth";
+import Auth from "../services/auth";
 
 // reactstrap components
 import {
+  Alert,
   Button,
   Card,
   CardHeader,
@@ -18,30 +19,51 @@ import {
   Col
 } from "reactstrap";
 
-// // core components
-// import DemoNavbar from "../components/Navbars/DemoNavbar.js";
-// import SimpleFooter from "../components/Footers/SimpleFooter.js";
-
-// const { useCallback } = React;
-
-// export const SignInButton = ({}) => {
-//   const signIn = useCallback(() => {
-//     Auth.signIn({ username, password }).then(onSignIn);
-//   }, [username, password, onSignIn]);
-
-//   return (
-//     <Button
-//       className="my-4"
-//       color="primary"
-//       type="button"
-//     >
-//       Sign in
-//     </Button>
-//   )
-// }
-
 
 class Login extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      login: '',
+      password: '',
+      shouldHide: true,
+    };
+
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  doLogin(event) {
+    event.preventDefault();
+    let login = this.state.login;
+    let password = this.state.password;
+    let str = login + ':' + password;
+    console.log(str);
+    Auth.doLogin();
+  }
+
+  handleSubmit = async (event) => {
+    event.preventDefault();
+    let login = this.state.login;
+    let password = this.state.password;
+
+    let str = login + ':' + password;
+    let response = await Auth.doLogin(str);
+    
+    if (response) {
+      let token = response.token_type + ' ' + response.access_token;
+      localStorage.setItem('token', token);
+      window.location.href = "/";
+    } else {
+      this.setState({shouldHide: false});
+    }
+  }
+
+  changeHandler = (event) => {
+    let nam = event.target.name;
+    let val = event.target.value;
+    this.setState({[nam]: val});
+  }
+
   render() {
     return (
       <>
@@ -56,59 +78,35 @@ class Login extends React.Component {
               <span />
               <span />
               <span />
+              <span />
             </div>
             <Container className="">
               <Row className="justify-content-center">
                 <Col lg="5">
                   <Card className="bg-secondary shadow border-0">
-                    <CardHeader className="bg-white pb-5">
-                      <div className="text-muted text-center mb-3">
-                        <small>Sign in with</small>
+                    <CardHeader className="bg-white pb-3">
+                      <div className="text-muted text-center">
+                        <img
+                          alt="..."
+                          className="img-fluid"
+                          src={require("../assets/img/brand/logo-safra.png")}
+                          style={{ width: "200px" }}
+                        />
                       </div>
-                      <div className="btn-wrapper text-center">
-                        <Button
-                          className="btn-neutral btn-icon"
-                          color="default"
-                          href="#pablo"
-                          onClick={e => e.preventDefault()}
-                        >
-                          <span className="btn-inner--icon mr-1">
-                            <img
-                              alt="..."
-                              src={require("../assets/img/icons/common/github.svg")}
-                            />
-                          </span>
-                          <span className="btn-inner--text">Github</span>
-                        </Button>
-                        <Button
-                          className="btn-neutral btn-icon ml-1"
-                          color="default"
-                          href="#pablo"
-                          onClick={e => e.preventDefault()}
-                        >
-                          <span className="btn-inner--icon mr-1">
-                            <img
-                              alt="..."
-                              src={require("../assets/img/icons/common/google.svg")}
-                            />
-                          </span>
-                          <span className="btn-inner--text">Google</span>
-                        </Button>
+                      <div className="text-center mt-3">
+                        <h2 class="display-4 mb-0">Fazer Login</h2>
                       </div>
                     </CardHeader>
                     <CardBody className="px-lg-5 py-lg-5">
-                      <div className="text-center text-muted mb-4">
-                        <small>Or sign in with credentials</small>
-                      </div>
-                      <Form role="form">
+                      <Form role="form" onSubmit={this.handleSubmit}>
                         <FormGroup className="mb-3">
                           <InputGroup className="input-group-alternative">
                             <InputGroupAddon addonType="prepend">
                               <InputGroupText>
-                                <i className="ni ni-email-83" />
+                                <i className="fa fa-user" />
                               </InputGroupText>
                             </InputGroupAddon>
-                            <Input placeholder="Email" type="email" />
+                            <Input placeholder="Login" ref="login" type="text" name="login" id="login" onChange={this.changeHandler} />
                           </InputGroup>
                         </FormGroup>
                         <FormGroup>
@@ -122,54 +120,27 @@ class Login extends React.Component {
                               placeholder="Password"
                               type="password"
                               autoComplete="off"
+                              id="password"
+                              name="password"
+                              ref="password"
+                              onChange={this.changeHandler}
                             />
                           </InputGroup>
                         </FormGroup>
-                        <div className="custom-control custom-control-alternative custom-checkbox">
-                          <input
-                            className="custom-control-input"
-                            id=" customCheckLogin"
-                            type="checkbox"
-                          />
-                          <label
-                            className="custom-control-label"
-                            htmlFor=" customCheckLogin"
-                          >
-                            <span>Remember me</span>
-                          </label>
-                        </div>
                         <div className="text-center">
                           <Button
                             className="my-4"
                             color="primary"
-                            type="button"
                           >
-                            Sign in
+                            LOGIN
                           </Button>
                         </div>
+                        <Alert color="danger" className={this.state.shouldHide ? 'hidden' : ''}>
+                          Não foi possível realizar o seu login!
+                        </Alert>
                       </Form>
                     </CardBody>
                   </Card>
-                  {/* <Row className="mt-3">
-                    <Col xs="6">
-                      <a
-                        className="text-light"
-                        href="#pablo"
-                        onClick={e => e.preventDefault()}
-                      >
-                        <small>Forgot password?</small>
-                      </a>
-                    </Col>
-                    <Col className="text-right" xs="6">
-                      <a
-                        className="text-light"
-                        href="#pablo"
-                        onClick={e => e.preventDefault()}
-                      >
-                        <small>Create new account</small>
-                      </a>
-                    </Col>
-                  </Row> */}
                 </Col>
               </Row>
             </Container>
